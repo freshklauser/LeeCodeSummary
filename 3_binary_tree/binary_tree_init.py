@@ -29,11 +29,11 @@ class BinaryTree:
 
 def init_bst():
     binaryTree = BinaryTree(0)
-    binaryTree.setLeft(BinaryTree(11))
-    binaryTree.setRight(BinaryTree(22))
-    binaryTree.getLeft().setLeft(BinaryTree(23))
+    binaryTree.setLeft(BinaryTree(1))
+    binaryTree.setRight(BinaryTree(2))
+    # binaryTree.getLeft().setLeft(BinaryTree(3))
     binaryTree.getLeft().setRight(BinaryTree(4))
-    binaryTree.getRight().setLeft(BinaryTree(15))
+    binaryTree.getRight().setLeft(BinaryTree(5))
     binaryTree.getRight().setRight(BinaryTree(6))
     return binaryTree
 

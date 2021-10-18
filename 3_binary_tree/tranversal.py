@@ -3,12 +3,39 @@
 # @DateTime : 2021/10/17 20:29
 # @FileName : tranversal.py
 # @SoftWare : PyCharm
+
+from collections import deque
+
 from binary_tree_init import init_bst
 
 
 class Traversal:
     def __init__(self):
         self.bst_values = []
+
+    @staticmethod
+    def layer_order_traversal(root):
+        """
+        BFS层序遍历, 使用队列
+        :param root:
+        :return:
+        """
+        result = []
+        dq = deque()
+        dq.append(root)
+        while dq:
+            cur_length = len(dq)
+            level = []
+            for _ in range(cur_length):
+                cur = dq.popleft()
+                if not cur:
+                    continue
+                dq.append(cur.left)
+                dq.append(cur.right)
+                level.append(cur.data)
+            if level:
+                result.append(level)
+        return result
 
     def pre_order_traversal(self, root, method=None):
         if method == 'recurse':
@@ -165,4 +192,5 @@ if __name__ == '__main__':
     print('后序stack：', Traversal().post_order_traversal__stack(b_tree))
     print('---'*50)
     print(Traversal().pre_order_traversal(b_tree))
+    print(Traversal().layer_order_traversal(b_tree))
     # print(pre_order(b_tree))
