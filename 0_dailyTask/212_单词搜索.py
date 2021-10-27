@@ -105,6 +105,8 @@ class Solution:
 
 
 if __name__ == '__main__':
+
+
     board = [["o", "a", "a", "n"], ["e", "t", "a", "e"], ["i", "h", "k", "r"]]
     words = ["oath", "pea", "eat", "rain"]
     board = [["b"], ["a"], ["b"], ["b"], ["a"]]
