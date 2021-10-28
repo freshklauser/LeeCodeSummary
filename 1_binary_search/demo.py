@@ -22,4 +22,37 @@ def is_valid(s):
     return cnt == 0
 
 
-print(is_valid("(a)((())((((()"))
+def check_power(num):
+    return bin(num).count('1') == 1
+
+
+print(list(filter(check_power, [2, 4, 6, 8, 10, 16])))
+
+
+class Solution:
+    def permute(self, nums):
+        res = []
+        self.dfs(nums, [], set(), res)
+        return res
+
+    def dfs(self, nums, path, visited, res):
+        """
+        index: 下一个要访问的元素索引
+        """
+        if len(path) == len(nums):
+            res.append(path)
+            return
+        for i in range(len(nums)):
+            if nums[i] in visited:
+                continue
+            path.append(nums[i])
+            visited.add(nums[i])
+            self.dfs(nums, path[:], visited, res)
+            path.pop()
+            visited.remove(nums[i])
+
+
+if __name__ == '__main__':
+    nums = [2, 4, 6, 8, 0]
+    inst = Solution()
+    inst.permute(nums)

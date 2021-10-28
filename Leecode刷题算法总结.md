@@ -327,6 +327,12 @@ class Solution:
 
 # DFS/BFS 回溯
 
+## 回溯模板
+
+![image.png](https://pic.leetcode-cn.com/1600377894-BuZLhZ-image.png)
+
+
+
 ## 使用场景
 
 - 返回所有可能结果
@@ -334,6 +340,125 @@ class Solution:
 
 
 ## 实际应用
+
+### 全排列
+
+#### 题目
+
+给定一个不含重复数字的数组 `nums` ，返回其 **所有可能的全排列** 。你可以 **按任意顺序** 返回答案。
+
+示例：
+
+```
+输入：nums = [1,2,3]
+输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
+```
+
+#### 解题思路（DFS+回溯 标准模板）
+
+1）代码
+
+```python
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        # return list(itertools.permutations(nums))
+        res = []
+        visited = set()
+        self.dfs(nums, [], visited, res)
+        return res
+
+    def dfs(self, nums, path, visited, res):
+        if len(path) == len(nums):
+            res.append(path)
+            return
+        
+        for i, num in enumerate(nums):
+            if num in visited:
+                continue
+            path.append(num)
+            visited.add(num)
+            self.dfs(nums, path[:], visited, res)
+            # 回溯
+            path.pop()
+            visited.remove(num)
+```
+
+### [重新排序得到 2 的幂](https://leetcode-cn.com/problems/reordered-power-of-2/)
+
+#### 题目
+
+给定正整数 N ，我们按任何顺序（包括原始顺序）将数字重新排序，注意其前导数字不能为零。
+
+如果我们可以通过上述方式得到 2 的幂，返回 true；否则，返回 false。
+
+示例：
+
+```
+输入：24
+输出：false
+```
+
+#### 解题思路（全排列/DFS/回溯/剪枝）
+
+1）剪枝：
+
+- len(path) == 0 and num == '0' ： 第一个为 0
+- visited[i] == 1：已经出现过的
+
+- i < len(nums) - 1 and num == nums[i + 1] and visited[i + 1] == 0：连续相同数的排列重复情况剪枝
+
+2）代码
+
+```python
+class Solution:
+    def reorderedPowerOf2(self, n: int) -> bool:
+
+        def dfs(nums, path, visited):
+            if len(path) == len(nums):
+                return self.check_power(int(path))
+            for i, num in enumerate(nums):
+                if len(path) == 0 and num == '0' or visited[i] == 1 or i < len(nums) - 1 and num == nums[i + 1] and visited[i + 1] == 0:
+                    continue
+                visited[i] = 1
+                status = dfs(nums, path + num, visited)
+                if status:
+                    return True
+                visited[i] = 0
+            return False
+
+        nums = sorted(list(str(n)))
+        visited = [0] * len(nums)
+        status = dfs(nums, '', visited)
+        return status
+
+    @staticmethod
+    def check_power(num):
+        return num & (num - 1) == 0
+```
+
+#### 解题思路（itertools库全排列）
+
+1）代码
+
+```python
+class Solution:
+    def reorderedPowerOf2(self, n: int) -> bool:
+        """
+        找出所有组合，利用itertools库实现全排列
+        """
+        permus = itertools.permutations(str(n))
+        queue = set([int(''.join(s)) for s in permus if s[0] != '0'])
+        result = list(filter(self.check_power, queue))
+        if result:
+            return True
+        return False
+
+    @staticmethod
+    def check_power(num):
+        return num & (num - 1) == 0
+```
+
+
 
 ### [ 删除无效的括号](https://leetcode-cn.com/problems/remove-invalid-parentheses/)
 
@@ -480,7 +605,7 @@ class Solution:
         return res
 ```
 
-
+### 
 
 
 
@@ -791,4 +916,39 @@ def pre_order_traversal__recurse(root):
            + pre_order_traversal__recurse(root.left) \
            + pre_order_traversal__recurse(root.right)
 ```
+
+# 附录
+
+## 常识性问题
+
+### 判断一个数是否为2的幂次方？
+
+二进制表示的2的幂次方数中只有一个1，后面跟的是n个0； 因此问题可以转化为判断1后面是否跟了n个0。如果将这个数减去1后会发现，仅有的那个1会变为0，而原来的那n个0会变为1；因此将原来的数与上(&)减去1后的数字，结果为零。
+
+```python
+def two_power_check(n):
+	return n & (n - 1) == 0
+```
+
+- 判断是否为4的幂次方
+
+  ```python
+  def isPowerOfFour(n):
+      if n <= 0:
+      	return False
+      m = int(math.sqrt(n))
+      return m * m == n and (m & (m - 1) == 0)
+  # 或者 n /= 4   n % 4 ==0
+  ```
+
+### 全排列 itertools.permutations
+
+```python
+In[41] : list(itertools.permutations([1,4,5], 3))
+Out[41]: [(1, 4, 5), (1, 5, 4), (4, 1, 5), (4, 5, 1), (5, 1, 4), (5, 4, 1)]
+```
+
+
+
+
 
