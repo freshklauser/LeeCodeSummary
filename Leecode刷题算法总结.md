@@ -400,9 +400,11 @@ class Solution:
 
 #### 解题思路（全排列/DFS/回溯/剪枝）
 
-1）剪枝：
+1）剪枝
 
-- len(path) == 0 and num == '0' ： 第一个为 0
+以下三种情况的任一种情况出现都可以剪枝
+
+- len(path) == 0 and num == '0' ： 第一个数字为 0
 - visited[i] == 1：已经出现过的
 
 - i < len(nums) - 1 and num == nums[i + 1] and visited[i + 1] == 0：连续相同数的排列重复情况剪枝
@@ -852,8 +854,6 @@ if __name__ == '__main__':
     # print(pre_order(b_tree))
 ```
 
-
-
 ### 前序遍历
 
 #### 递归（通用模板）
@@ -916,6 +916,42 @@ def pre_order_traversal__recurse(root):
            + pre_order_traversal__recurse(root.left) \
            + pre_order_traversal__recurse(root.right)
 ```
+
+## 实际应用
+
+### 对称二叉树（递归/层序遍历）
+
+- 题目
+
+  给定一个二叉树，检查它是否是镜像对称的。
+
+- 代码
+
+  ```python
+  # Definition for a binary tree node.
+  class TreeNode:
+      def __init__(self, val=0, left=None, right=None):
+      self.val = val
+      self.left = left
+      self.right = right
+      
+  class Solution:
+      def isSymmetric(self, root: TreeNode) -> bool:
+          
+          def check(l, r):
+              if (l == None and r != None) or (l != None and r == None):
+                  return False
+              elif l == None and r == None:
+                  return True
+              else:
+                  return l.val == r.val and check(l.right, r.left) and check(l.left, r.right)
+          
+          if not root:
+              return True
+          return check(root.left, root.right)
+  ```
+
+### 
 
 # 附录
 
