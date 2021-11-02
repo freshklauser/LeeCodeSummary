@@ -1,4 +1,4 @@
-
+​	
 
 [TOC]
 
@@ -951,7 +951,129 @@ def pre_order_traversal__recurse(root):
           return check(root.left, root.right)
   ```
 
-### 
+### [路径总和](https://leetcode-cn.com/problems/path-sum/) （二叉树 BFS/DFS/递归/栈）
+
+#### 题目
+
+给你二叉树的根节点 root 和一个表示目标和的整数 targetSum ，判断该树中是否存在 根节点到叶子节点 的路径，这条路径上所有节点值相加等于目标和 targetSum 。叶子节点 是指没有子节点的节点
+
+示例：
+
+![img](https://assets.leetcode.com/uploads/2021/01/18/pathsum1.jpg)
+
+```
+输入：root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22
+输出：true
+```
+
+#### 解题思路 （BFS/DFS/递归/栈）
+
+1）代码
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        
+        """ 递归 """
+        # if not root:
+        #     return False
+        # if root.left is None and root.right is None:
+        #     return root.val == targetSum
+        # return self.hasPathSum(root.left, targetSum - root.val) or self.hasPathSum(root.right, targetSum - root.val)
+
+        """ bfs """
+        if not root:
+            return False
+        queue = collections.deque()
+        queue.append((root, root.val))
+        while queue:
+            node, presum = queue.popleft()
+            if not node.left and not node.right and presum == targetSum:
+                return True
+            if node.left:
+                queue.append((node.left, presum + node.left.val))
+            if node.right:
+                queue.append((node.right, presum + node.right.val))
+        return False
+            
+        """ 栈 非递归 """
+        # if not root:
+        #     return False
+        # stack = [(root, root.val)]
+        # while stack:
+        #     node, t_sum = stack.pop()
+        #     if not node.left and not node.right and t_sum == targetSum:
+        #         return True
+        #     if node.left:
+        #         stack.append((node.left, node.left.val + t_sum))
+        #     if node.right:
+        #         stack.append((node.right, node.right.val + t_sum))
+        # return False
+
+        
+        """ dfs, 输出所有路径 """
+        # if not root:
+        #     return False
+        # def dfs(node, presum, res,  path):
+        #     # res: 存储所有符合条件的结点路径    <-----
+        #     # path: 节点路径					<-----
+        #     # presum: 前缀和
+        #     if not node:
+        #         return
+        #     if not node.left and not node.right and presum == targetSum:
+        #         res.append(path)
+        #     if node.left:
+        #         dfs(node.left, presum + node.left.val, res, path + [node.left.val])
+        #     if node.right:
+        #         dfs(node.right, presum + node.right.val, res, path + [node.right.val])
+        # res = []
+        # dfs(root, root.val, res, [root.val])
+        # return len(res) > 0
+
+        # def dfs(node, presum):
+        #     if not node:
+        #         return False
+        #     if not node.left and not node.right and presum == targetSum:
+        #         return True
+        #     if node.left:
+        #         status = dfs(node.left, presum + node.left.val)
+        #         if status:
+        #             return True
+        #     if node.right:
+        #         status = dfs(node.right, presum + node.right.val)
+        #         if status:
+        #             return True
+        #     return False
+
+        # return dfs(root, root.val)
+
+```
+
+#### [路径总和 III](https://leetcode-cn.com/problems/path-sum-iii/)
+
+#### 题目
+
+给定一个二叉树的根节点 root ，和一个整数 targetSum ，求该二叉树里节点值之和等于 targetSum 的 路径 的数目。
+
+路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+
+示例：
+
+![img](https://assets.leetcode.com/uploads/2021/04/09/pathsum3-1-tree.jpg)
+
+```
+输入：root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8
+输出：3
+解释：和等于 8 的路径有 3 条，如图所示。
+```
+
+#### 解题思路
 
 # 附录
 
