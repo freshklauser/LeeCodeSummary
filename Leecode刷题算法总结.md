@@ -1055,7 +1055,7 @@ class Solution:
 
 ```
 
-#### [路径总和 III](https://leetcode-cn.com/problems/path-sum-iii/)
+### [路径总和 III](https://leetcode-cn.com/problems/path-sum-iii/)
 
 #### 题目
 
@@ -1074,6 +1074,81 @@ class Solution:
 ```
 
 #### 解题思路
+
+
+
+# 优先队列/堆
+
+## 堆构建/属性/方法
+
+- python库： heapq
+
+## 实际应用
+
+### 接雨水Ⅱ (优先队列/小顶堆)
+
+#### 题目
+
+给你一个 `m x n` 的矩阵，其中的值均为非负整数，代表二维高度图每个单元的高度，请计算图中形状最多能接多少体积的雨水。
+
+ 示例：
+
+![img](https://assets.leetcode.com/uploads/2021/04/08/trap1-3d.jpg)
+
+```
+输入: heightMap = [[1,4,3,1,3,2],[3,2,1,3,2,4],[2,3,3,2,3,1]]
+输出: 4
+解释: 下雨后，雨水将会被上图蓝色的方块中。总的接雨水量为1+2+1=4。
+```
+
+#### 解题思路（小顶堆）
+
+1）思路
+
+​	维护周围一个圈，用堆来维护周围这一圈中的最小元素。为什么是维护最小的元素不是最大的元素呢，因为木桶原理呀。这个最小的元素从堆里弹出来，和它四个方向的元素去比较大小，看能不能往里灌水，怎么灌水呢，如果用方向就比较复杂了，我们可以用visited数组来表示哪些遍历过，哪些没遍历过。如果当前弹出来的高度比它周围的大，他就能往矮的里面灌水了，灌水后要把下一个柱子放进去的时候，放的高度要取两者较大的，也就是灌水后的高度，不是它原来矮的时候的高度了，如果不能灌水，继续走。
+
+​	示例如：先把第一圈都放进去，然后开始从堆中弹出，第一圈，最小值是1（遍历时候标记为访问过），1从堆里弹出来，比如弹出来1(坐标[0,3])，它下方的3没有被访问过，尝试灌水，发现不能灌水，3入堆，然后继续弹。比如说，我此时弹出来一个3（坐标[1,0]），它能向右边2(坐标[1,1])灌水，那这边就可以统计了，然后我们要插入2(坐标[1,1])这个位置，但是插入的时候，要记得你得是插入的高度得是灌水后的高度，而不是原来的高度了
+
+2）代码
+
+```python
+class Solution:
+    def trapRainWater(self, heightMap: List[List[int]]) -> int:
+        row = len(heightMap)
+        col = len(heightMap[0])
+        
+        # 特殊情况
+        if row < 3 or col < 3:
+            return 0
+
+        visited = [[0] * col for _ in range(row)]
+        # 最外层元素构建优先队列(小顶堆)--  队列元素结构为 (h, i, j), 排序顺序优先级按索引从小到大
+        priority_queue = []
+        for j in range(col):
+            priority_queue.append((heightMap[0][j], 0, j))
+            priority_queue.append((heightMap[row - 1][j], row - 1, j))
+        for i in range(1, row - 1):
+            priority_queue.append((heightMap[i][0], i, 0))
+            priority_queue.append((heightMap[i][col - 1], i, col - 1))
+        heapq.heapify(priority_queue)
+
+        # 遍历优先队列, 每次pop最小高度元素，找找四周元素的内部节点，添加内部节点到队列中且该节点高度为 当前系欸但和内部节点高度的较大值
+        directions = [(0,1),(1,0),(0,-1),(-1,0)]
+        volume = 0
+        while priority_queue:
+            h, x, y = heapq.heappop(priority_queue)
+            for dx, dy in directions:
+                nx = x + dx
+                ny = y + dy
+                if 0 < nx < row - 1 and 0 < ny < col - 1 and not visited[nx][ny]:
+                    # 内部节点注水且将内部节点替换当前节点作为外围节点，内部节点标记1
+                    volume += max(0, h - heightMap[nx][ny])
+                    visited[nx][ny] = 1
+                    heapq.heappush(priority_queue, (max(h, heightMap[nx][ny]), nx, ny))
+        return volume
+```
+
+
 
 # 附录
 
