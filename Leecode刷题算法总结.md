@@ -615,6 +615,8 @@ class Solution:
 
 ## 二叉树构建
 
+### 基本构建
+
 ```python
 class BinaryTree:
     def __init__(self, data):
@@ -653,7 +655,145 @@ def init_bst():
 
 
 
-## 遍历二叉树
+### [从中序与后序遍历序列构造二叉树](https://leetcode-cn.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
+
+根据一棵树的中序遍历与后序遍历构造二叉树。
+
+注意:
+你可以假设树中没有重复的元素。
+
+```reStructuredText
+例如，给出
+中序遍历 inorder = [9,3,15,20,7]
+后序遍历 postorder = [9,15,7,20,3]
+构建二叉树结果：[3,9,20,null,null,15,7]
+```
+
+1）思路：根据中序遍历和后续遍历特性划分出左右子树
+
+![树的特性.png](https://pic.leetcode-cn.com/3293e7ccb41baaf52adca7e13cc0f258e1c83a4c588f9b6cb3e86410a540f298-%E6%A0%91%E7%9A%84%E7%89%B9%E6%80%A7.png)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+        if postorder == []:
+            return None
+        val = postorder.pop()
+
+        # 1. 根节点的val属性
+        root = TreeNode(val)
+        rt_idx = inorder.index(val)
+
+        # 中序遍历的左子树节点和右子树节点
+        inorder_left = inorder[:rt_idx]
+        inorder_right = inorder[rt_idx + 1:]
+
+        # 后续遍历的左子树节点和右子树节点
+        postorder_left = postorder[:rt_idx]
+        postorder_right = postorder[rt_idx: rt_idx + len(inorder_right)]
+
+        # 2. 根节点的 left 属性 和 right 属性
+        # 利用左子树的中序遍历和后续遍历结果构建root的左子树，递归实现
+        root.left = self.buildTree(inorder_left, postorder_left)
+        # 利用右子树的中序遍历和后续遍历结果构建root的右子树，递归实现
+        root.right = self.buildTree(inorder_right, postorder_right)
+
+        return root
+```
+
+
+
+### 从前序和中序遍历序列构造二叉树
+
+思路：类似3.1.2， 确定 root 索引后划分左子树和右子树，递归
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+        if not preorder:
+            return None
+        val = preorder[0]
+        root = TreeNode(val)
+
+        rt_idx = inorder.index(val)
+
+        preorder_left = preorder[1: rt_idx + 1]
+        preorder_right = preorder[rt_idx + 1:]
+
+        inorder_left = inorder[:rt_idx]
+        inorder_right = inorder[rt_idx + 1:]
+
+        root.left = self.buildTree(preorder_left, inorder_left)
+        root.right = self.buildTree(preorder_right, inorder_right)
+
+        return root
+```
+
+### [ 填充每个节点的下一个右侧节点指针](https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node/)
+
+Ⅱ 与该题一样
+
+示例：
+
+![img](https://assets.leetcode.com/uploads/2019/02/14/116_sample.png)
+
+```
+输入：root = [1,2,3,4,5,6,7]
+输出：[1,#,2,3,#,4,5,6,7,#]
+解释：给定二叉树如图 A 所示，你的函数应该填充它的每个 next 指针，以指向其下一个右侧节点，如图 B 所示。序列化的输出按层序遍历排列，同一层节点由 next 指针连接，'#' 标志着每一层的结束。
+```
+
+思路：**BFS 层序遍历过程中添加 next 关系**
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        """ BFS 层序遍历 """
+        queue = collections.deque()
+        queue.append(root)
+        while queue:
+            cur_layer_length = len(queue)
+            for i in range(cur_layer_length):
+                cur_node = queue.popleft()
+                # 注意 None 节点判断
+                if not cur_node:
+                    continue
+                if i == cur_layer_length - 1:
+                    cur_node.next = None
+                else:
+                    cur_node.next = queue[0]
+                if cur_node.left:
+                	queue.append(cur_node.left)
+                if cur_node.right:
+                	queue.append(cur_node.right)
+        return root
+```
+
+
+
+## 遍历二x叉树
 
 ```python
 # -*- coding: utf-8 -*-
@@ -917,6 +1057,8 @@ def pre_order_traversal__recurse(root):
            + pre_order_traversal__recurse(root.right)
 ```
 
+
+
 ## 实际应用
 
 ### 对称二叉树（递归/层序遍历）
@@ -1075,9 +1217,15 @@ class Solution:
 
 #### 解题思路
 
+### 
+
 
 
 # 优先队列/堆
+
+## 使用场景
+
+- 最大k / 最小k 问题，需要动态查找每一步的最小值或最大值
 
 ## 堆构建/属性/方法
 
