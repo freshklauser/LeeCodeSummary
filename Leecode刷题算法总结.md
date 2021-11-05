@@ -1296,6 +1296,42 @@ class Solution:
         return volume
 ```
 
+# 字符串
+
+## 双指针
+
+# 动态规划
+
+## 实际应用
+
+### [最长定差子序列](https://leetcode-cn.com/problems/longest-arithmetic-subsequence-of-given-difference/)
+
+#### 题目
+
+给你一个整数数组 arr 和一个整数 difference，请你找出并返回 arr 中最长等差子序列的长度，该子序列中相邻元素之间的差等于 difference 。
+
+子序列 是指在不改变其余元素顺序的情况下，通过删除一些元素或不删除任何元素而从 arr 派生出来的序列。
+
+#### 解题思路（DP巧解）
+
+1）技巧
+
+​	从左往右遍历 \textit{arr}arr，并计算出以 \textit{arr}[i]arr[i] 为结尾的最长的等差子序列的长度，取所有长度的最大值，即为答案
+
+​	由于总是在左侧找一个最近的等于arr[i]−d 元素并取其对应 dp 值，因此我们直接用dp[v] 表示以 v 为结尾的最长的等差子序列的长度，这样 **dp[v−d]  就是我们要找的左侧元素对应的最长的等差子序列的长度**，因此转移方程可以改为 <font color=red>**dp[v]=dp[v−d]+1**</font>
+2）代码
+
+```python
+class Solution:
+    def longestSubsequence(self, arr: List[int], difference: int) -> int:
+        # defaultdict占用内存比res.get(num - difference, 0)大, 推荐后者
+        # res = collections.defaultdict(int)  
+        res = dict()
+        for num in arr:
+            res[num] = res.get(num - difference, 0) + 1
+        return max(res.values())
+```
+
 
 
 # 附录
