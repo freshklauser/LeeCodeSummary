@@ -493,45 +493,78 @@ print(newlist)	# [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
 
 **2）代码**
 
-```python
-class Solution:
+```class Solution:
+
     def removeInvalidParentheses(self, s: str) -> List[str]:
+
         """
+
         bfs
+
         每一轮while loop 只减少一个半括号 并判断该轮是否右合理的字符串，有则返回结果，
+
         无则在该轮的不合理字符串基础上，再减少一个半括号来轮循校验
+
         """
+
         # 每一层减少一个半括号有可能存在重复的子字符串，直接用set代替列表来去重
+
         queue = set()
+
         queue.add(s)
 
+
         while queue:
+
             # 判断当前队列集合中是否存在合理的字符串，有则直接返回结果，无则继续
+
             result = list(filter(self.is_valid, queue))
+
             if result:
+
                 return result
+
             
+
             cur_layer_queue = set()
+
             for chars in queue:
+
                 for i, char in enumerate(chars):
+
                     if char == '(' or char == ')':
+
                         cur_layer_queue.add(chars[:i] + chars[i + 1:])
+
             # 当前层遍历完后，将所有的去掉一个字符的子字符串赋值给 queue
+
             queue = cur_layer_queue
+
     
+
     def is_valid(self, s):
+
         cnt = 0
+
         for char in s:
+
             if char == '(':
+
                 cnt += 1
+
             if char == ')':
+
                 cnt -= 1
+
                 # 右括号多则直接无效
+
                 if cnt < 0:
+
                     return False
+
         # 合理的字符串，左右括号相等，cnt==0
+
         return cnt == 0
-```
 
 #### 解题思路（回溯+剪枝）
 
@@ -551,7 +584,7 @@ class Solution:
 
 **1）代码**  (未自己实现)
 
-```python
+​```python
 class Solution:
     def removeInvalidParentheses(self, s: str) -> List[str]:
         res = []
@@ -1332,7 +1365,278 @@ class Solution:
         return max(res.values())
 ```
 
-# 数据结构
+# 字典树/前缀树Trie
+
+## Trie树实现 （dict / TrieNode）
+
+- 题目
+
+  Trie（发音类似 "try"）或者说 前缀树 是一种树形数据结构，用于高效地存储和检索字符串数据集中的键。这一数据结构有相当多的应用情景，例如<font color=red>**自动补完和拼写检查**</font>。
+
+  请你实现 Trie 类：
+
+  Trie() 初始化前缀树对象。
+  void insert(String word) 向前缀树中插入字符串 word 。
+  boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。
+  boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。
+
+- 思路
+
+  以嵌套字典替代树，我们从字典树的根开始，查找前缀。对于当前字符对应的子节点，有两种情况：
+
+  - 子节点存在。沿着指针移动到子节点，继续搜索下一个字符。
+  - 子节点不存在。说明字典树中不包含该前缀，返回空指针。
+
+  重复以上步骤，直到返回空指针或搜索完前缀的最后一个字符。
+
+  若搜索到了前缀的末尾，就说明字典树中存在该前缀。此外，若前缀末尾对应节点的 end 属性 为真，则说明字典树中存在该字符串。
+
+- Trie示例
+
+  ```python
+  # {'a': {'p': {'p': {'l': {'e': {'end': True}}, 'end': True}, 'o': {'l': {'o': {'g': {'e': {'end': True}}}}}}}}
+  
+  {
+    "a": {
+      "p": {
+        "p": {
+          "l": {
+            "e": {
+              "end": true
+            }
+          },
+          "end": true
+        },
+        "o": {
+          "l": {
+            "o": {
+              "g": {
+                "e": {
+                  "end": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+
+### dict实现
+
+```python
+class Trie:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.root = dict()
+
+    def insert(self, word: str) -> None:
+        """
+        Inserts a word into the trie.
+        """
+        cur_node = self.root
+        for char in word:
+            if char not in cur_node:
+                cur_node[char] = dict()
+            # 移动指针当前节点到下一个节点
+            cur_node = cur_node[char]
+        # 最后一个节点，即单词结束的节点，end 为key, value为True, 表示单词在该节点结束
+        cur_node['end'] = True
+
+    def search(self, word: str) -> bool:
+        """
+        Returns if the word is in the trie.
+        """
+        cur_node = self.root
+        for char in word:
+            if char not in cur_node:
+                return False
+            cur_node = cur_node[char]
+        return 'end' in cur_node
+
+    def startsWith(self, prefix: str) -> bool:
+        """
+        Returns if there is any word in the trie that starts with the given prefix.
+        """
+        cur_node = self.root
+        for char in prefix:
+            if char not in cur_node:
+                return False
+            cur_node = cur_node[char]
+        return True
+```
+
+### TrieNode实现
+
+本质还是用dict实现
+
+Trie，又称前缀树或字典树，是一棵有根树，其每个节点包含以下字段：
+
+- 指向子节点的指针数组 <font color=red>children</font>。对于本题而言，数组长度为 26，即小写英文字母的数量。此时 children[0] 对应小写字母 a，children[1] 对应小写字母 b，…，children[25] 对应小写字母 z。
+- 布尔字段 <font color=red>isEnd</font>，表示该节点是否为字符串的结尾。
+
+
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = dict()
+        self.isEnd = False
+
+class Trie:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        cur = self.root
+        for c in word:
+            if c not in cur.children:
+                cur.children[c] = TrieNode()
+            cur = cur.children[c]
+        cur.isEnd = True
+
+    def search(self, word: str) -> bool:
+        cur = self.root
+        for c in word:
+            if c not in cur.children:
+                return False
+            cur = cur.children[c]
+        return cur.isEnd
+
+    def startsWith(self, prefix: str) -> bool:
+        cur = self.root
+        for c in prefix:
+            if c not in cur.children:
+                return False
+            cur = cur.children[c]
+        return True
+```
+
+## [添加与搜索单词 - 数据结构设计](https://leetcode-cn.com/problems/design-add-and-search-words-data-structure/) (字典树搜索)
+
+- 题目
+
+  ```
+  请你设计一个数据结构，支持 添加新单词 和 查找字符串是否与任何先前添加的字符串匹配 。
+  
+  实现词典类 WordDictionary ：
+  
+  WordDictionary() 初始化词典对象
+  void addWord(word) 将 word 添加到数据结构中，之后可以对它进行匹配
+  bool search(word) 如果数据结构中存在字符串与 word 匹配，则返回 true ；否则，返回  false 。word 中可能包含一些 '.' ，每个 . 都可以表示任何一个字母。
+  ```
+
+- 思路
+
+  字典树+DFS：DFS递归遍历节点
+
+  递归分成两种情况讨论:
+
+  - 当前字符不为.
+  - 当前字符为.
+
+  对于第一种情况，如果当前字符不为., 我们正常判断即可：
+
+  - 如果当前字符存在于前缀树中，那么把当前的指针指向其孩子对应字符的节点，并且起始索引+1（指向下一个字符）。
+  - 如果不存在前缀树中，可以直接返回False
+
+  那么对于第二种情况，因为.是一个通配符，我们需要遍历当前层所有可能的字符：
+
+  - 如果该层存在字符，往下一层搜索，如果下一层不存在满足的字符（比如下一层没有字符了，或者下一层所有的字符都不满足，或者下一层不存在指定的字符）则返回False
+  - 如果已经发现了满足条件的单词，我们直接剪枝，避免后续无效迭代（见代码注释）
+  - 如果没有满足的情况再返回False
+
+### TrieNode+DFS
+
+```PYTHON
+class TrieNode:
+    def __init__(self):
+        self.children = dict()
+        self.isEnd = False
+
+
+class WordDictionary:
+
+    def __init__(self):
+        self.root = TrieNode()
+
+    def addWord(self, word: str) -> None:
+        cur = self.root
+        for c in word:
+            if c not in cur.children:
+                cur.children[c] = TrieNode()
+            cur = cur.children[c]
+        cur.isEnd = True
+
+    def search(self, word: str) -> bool:
+        
+        def dfs(node, word, cur_idx):
+            # 终止条件
+            if cur_idx == len(word):
+                return True and node.isEnd
+            
+            for idx in range(cur_idx, len(word)):
+                # 递归，不同分支不同递归逻辑
+                if word[idx] != '.':
+                    if word[idx] in node.children:
+                        return dfs(node.children[word[idx]], word, idx + 1)
+                    else:
+                        return False
+                else:
+                    # 通配符 . 的情况下, 遍历每一个children进行递归，遇到True直接中断迭代
+                    for ch_key in node.children:
+                        ch_res = dfs(node.children[ch_key], word, idx + 1)
+                        if ch_res:
+                            return True
+                    return False
+        
+        return dfs(self.root, word, 0)
+```
+
+
+
+### Trie+BFS
+
+```PYTHON
+class WordDictionary:
+
+    def __init__(self):
+        self.trie = dict()
+
+    def addWord(self, word: str) -> None:
+        node = self.trie
+        for c in word:
+            if c not in node:
+                node[c] = dict()
+            node = node[c]
+        node['#'] = dict()					# BFS 中 这里与之前构建Trie不同
+
+    def search(self, word: str) -> bool:
+        word += '#'							# 手动架上结尾字符
+        queue = collections.deque()
+        queue.append((0, self.trie))
+        while queue:
+            idx, node = queue.popleft()
+            if idx == len(word):			# 终止条件 idx == len(word)
+                return True
+            if word[idx] != '.':
+                if word[idx] in node:
+                    queue.append((idx + 1, node[word[idx]]))
+            else:
+                for ch_node in node.values():
+                    queue.append((idx + 1, ch_node))
+        return False
+```
+
+
+
+# 系统设计类
 
 ## LRU缓存 （哈希-双向链表）
 
@@ -1437,6 +1741,36 @@ class Solution:
           self.__tail.prev = node.prev
           node.prev.next = self.__tail
           return node.key
+  ```
+
+## [设计搜索自动补全系统](https://leetcode-cn.com/problems/design-search-autocomplete-system/)  (前缀树Trie)
+
+- 题目
+
+  ```reStructuredText
+  为搜索引擎设计一个搜索自动补全系统。用户会输入一条语句（最少包含一个字母，以特殊字符 '#' 结尾）。除 '#' 以外用户输入的每个字符，返回历史中热度前三并以当前输入部分为前缀的句子。下面是详细规则：
+  
+  一条句子的热度定义为历史上用户输入这个句子的总次数。
+  返回前三的句子需要按照热度从高到低排序（第一个是最热门的）。如果有多条热度相同的句子，请按照 ASCII 码的顺序输出（ASCII 码越小排名越前）。
+  如果满足条件的句子个数少于 3，将它们全部输出。
+  如果输入了特殊字符，意味着句子结束了，请返回一个空集合。
+  你的工作是实现以下功能：
+  
+  构造函数：
+  
+  AutocompleteSystem(String[] sentences, int[] times): 这是构造函数，输入的是历史数据。 Sentences 是之前输入过的所有句子，Times 是每条句子输入的次数，你的系统需要记录这些历史信息。
+  
+  现在，用户输入一条新的句子，下面的函数会提供用户输入的下一个字符：
+  
+  List<String> input(char c): 其中 c 是用户输入的下一个字符。字符只会是小写英文字母（'a' 到 'z' ），空格（' '）和特殊字符（'#'）。输出历史热度前三的具有相同前缀的句子。
+  ```
+
+- 思路
+
+- 代码
+
+  ```python
+  
   ```
 
   
