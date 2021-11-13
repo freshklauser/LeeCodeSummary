@@ -25,6 +25,14 @@ class LRUCache:
     def put(self, key, value):
         pass
 
+class newdd(LRUCache):
+    def __init__(self, v):
+        super(newdd, self).__init__()
+        self.v = v
+
+
+
+
 
 
 

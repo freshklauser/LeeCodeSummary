@@ -1259,6 +1259,7 @@ class Solution:
 ## 使用场景
 
 - 最大k / 最小k 问题，需要动态查找每一步的最小值或最大值
+- 动态维护数据有序性
 
 ## 堆构建/属性/方法
 
@@ -1328,6 +1329,94 @@ class Solution:
                     heapq.heappush(priority_queue, (max(h, heightMap[nx][ny]), nx, ny))
         return volume
 ```
+
+#### [合并K个升序链表](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+
+#### 题目
+
+给你一个链表数组，每个链表都已经按升序排列。
+
+请你将所有链表合并到一个升序链表中，返回合并后的链表。
+
+#### 解题思路（优先队列）
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+        if not lists:
+            return
+        
+        newHead = ListNode(None)
+        heap = []
+
+        # 依次取出 所有 ListNode 中的元素，每个节点val添加到优先队列heap中
+        for node in lists:
+            while node:
+                heapq.heappush(heap, node.val)
+                node = node.next
+
+        # 从优先队列heap中依次弹出堆顶元素重构 ListNode
+        cur = newHead
+        while heap:
+            cur.next = ListNode(heapq.heappop(heap))
+            cur = cur.next
+        return newHead.next
+```
+
+
+
+#### 解题思路（优先队列 / 构建可比较的 ListNode 对象）
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class ListNodeCompare:
+    def __init__(self, listNode):
+        self.node = listNode
+    
+    # 定义富比较函数
+    def __lt__(self, other):
+        return self.node.val < other.node.val
+
+
+class Solution:
+    def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+
+        new_lists = [item for item in lists if item]
+        if not new_lists:
+            return 
+
+        newHead = ListNode(None)
+
+        heap = []
+        for head in new_lists:
+            new_node = ListNodeCompare(head)
+            heap.append(ListNodeCompare(head))
+        heapq.heapify(heap)
+        
+        cur = newHead
+        while heap:
+            org_node = heapq.heappop(heap).node
+            cur.next = org_node
+            cur = cur.next
+            # 原链表中将 org_node 的next 构成的 ListNodeCompare 推入优先队列
+            if org_node.next:
+                new_node = ListNodeCompare(org_node.next)
+                heapq.heappush(heap, new_node)
+        return newHead.next
+```
+
+
 
 # 字符串
 
@@ -1743,7 +1832,7 @@ class WordDictionary:
           return node.key
   ```
 
-## [设计搜索自动补全系统](https://leetcode-cn.com/problems/design-search-autocomplete-system/)  (前缀树Trie)
+## [设计搜索自动补全系统](https://leetcode-cn.com/problems/design-search-autocomplete-system/)  (前缀树Trie)  -- 未完成
 
 - 题目
 
@@ -1773,7 +1862,171 @@ class WordDictionary:
   
   ```
 
+## [设计推特](https://leetcode-cn.com/problems/design-twitter/) （合并K个有序链表--多路归并 / 哈希表）
+
+- 题目
+
+  ```
+  设计一个简化版的推特(Twitter)，可以让用户实现发送推文，关注/取消关注其他用户，能够看见关注人（包括自己）的最近 10 条推文。
   
+  实现 Twitter 类：
+  
+  Twitter() 初始化简易版推特对象
+  void postTweet(int userId, int tweetId) 根据给定的 tweetId 和 userId 创建一条新推文。每次调用次函数都会使用一个不同的 tweetId 。
+  List<Integer> getNewsFeed(int userId) 检索当前用户新闻推送中最近  10 条推文的 ID 。新闻推送中的每一项都必须是由用户关注的人或者是用户自己发布的推文。推文必须 按照时间顺序由最近到最远排序 。
+  void follow(int followerId, int followeeId) ID 为 followerId 的用户开始关注 ID 为 followeeId 的用户。
+  void unfollow(int followerId, int followeeId) ID 为 followerId 的用户不再关注 ID 为 followeeId 的用户。
+  ```
+
+- 思虑1： 所有好友的top10放在一起排序再取top10 （数据量小可以，海量数据不适合）
+
+- 思路2：有序链表多路归并
+
+### 哈希表
+
+```python
+class Twitter:
+
+    def __init__(self):
+        self.user_follow = collections.defaultdict(set)
+        self.user_post = collections.defaultdict(list)
+        self.auto_incre = 0
+
+    def postTweet(self, userId: int, tweetId: int) -> None:
+        self.user_post[userId].append((self.auto_incre, tweetId))
+        self.auto_incre += 1
+
+    def getNewsFeed(self, userId: int) -> List[int]:
+        friends = self.user_follow[userId]
+        tweet_tops = self.user_post[userId][-10:]
+        for friend in friends:
+            tweet_tops.extend(self.user_post[friend][-10:])
+        tweet_tops.sort(key=lambda x: -x[0])
+        return [item[1] for item in tweet_tops[:10]]
+        
+    def follow(self, followerId: int, followeeId: int) -> None:
+        if followerId != followeeId:
+            self.user_follow[followerId].add(followeeId)
+
+    def unfollow(self, followerId: int, followeeId: int) -> None:
+        if followeeId in self.user_follow[followerId]:
+            self.user_follow[followerId].remove(followeeId)
+```
+
+### 哈希表+链表多路归并+优先队列  
+
+链表多路归并采用优先队列获取top-N
+
+- 思路
+
+  这里需求 3 和需求 4，只需要维护「我关注的人的 id 列表」 即可，不需要维护「谁关注了我」，由于不需要维护有序性，为了删除和添加方便， 「我关注的人的 id 列表」需要设计成哈希表（HashSet），而每一个人的和对应的他关注的列表存在一个哈希映射（HashMap）里；
+  最复杂的是需求 2 getNewsFeed(userId):
+  每一个人的推文和他的 id 的关系，依然是存放在一个哈希表里；
+  对于每一个人的推文，**只有顺序添加的需求，没有查找、修改、删除操作，因此可以使用线性数据结构**，链表或者数组均可；
+
+  - 使用数组就需要在尾部添加元素，还需要考虑扩容的问题（使用动态数组）；
+
+  - 使用链表就得在头部添加元素，由于链表本身就是动态的，无需考虑扩容；
+
+  检索最近的十条推文，需要先把这个用户关注的人的列表拿出来（实际上不是这么做的，请看具体代码，或者是**「多路归并」**的过程），然后再合并，排序以后选出 Top10，这其实是非常经典的「多路归并」的问题（「力扣」第 23 题：合并K个排序链表），这里需要使用的数据结构是**优先队列**，所以在上一步在存储推文列表的时候使用单链表是合理的，并且应**该存储一个时间戳字段，用于比较哪一队的队头元素先出列**。
+
+- 总结：
+
+  如果需要维护数据的时间有序性，链表在特殊场景下可以胜任。因为时间属性通常来说是相对固定的，而不必去维护顺序性；
+  如果需要<font color=red>动态维护数据有序性，「优先队列」（堆）是可以胜任的</font>，「力扣」上搜索「堆」（heap）标签，可以查看类似的问题；
+
+  
+
+```python
+class Tweet:
+    def __init__(self, tweetId, timestamp):
+        self.id = tweetId
+        self.timestamp = timestamp
+        self.next = None
+    
+    # 定义富比较函数 小于，确保结构体Tweet 可直接用与 堆排列
+    def __lt__(self, other):
+        return self.timestamp > other.timestamp
+
+class Twitter:
+
+    def __init__(self):
+        self.timestamp = 0
+        self.tweets = collections.defaultdict(lambda: None)     # 默认没发推的返回值是None
+        self.friends = collections.defaultdict(set)
+
+    def postTweet(self, userId: int, tweetId: int) -> None:
+        tweet = Tweet(tweetId, self.timestamp)
+        # 新Tweet节点添加到用户链表头
+        tweet.next = self.tweets[userId]
+        # 更新 tweets 中保存的用户链表头节点为当前新增的节点(只保留头结点，不保留所有文章)
+        self.tweets[userId] = tweet
+        self.timestamp += 1
+
+    def getNewsFeed(self, userId: int) -> List[int]:
+        # 优先队列heapq每次比较自己与关注的用户的头结点中的最小Tweet(对应时间戳最大，即最新节点)
+        # 取够十个就可以了
+        tops = []               # 保存返回值
+        hints = []              # 动态保存优先队列的堆顶元素
+        cur_user_tweet = self.tweets[userId]        # 可能没发推即None
+        if cur_user_tweet:
+            hints.append(cur_user_tweet)
+        for user in self.friends[userId]:
+            cur_user_tweet = self.tweets[user]
+            if cur_user_tweet:
+                hints.append(cur_user_tweet)
+        # 朋友圈所有人包括自己的tweet文章的头结点组成的列表hints堆化
+        heapq.heapify(hints)
+        
+        # 动态从hints中取堆顶元素(这里的小顶堆堆顶元素的时间戳最大，即最新tweet)
+        while hints and len(tops) < 10:
+            # 堆顶元素取出添加到 tops 中
+            top = heapq.heappop(hints)
+            tops.append(top.id)
+            # 取出后将top.next添加到优先队列hints中
+            if top.next:
+                heapq.heappush(hints, top.next)
+        return tops
+
+    def follow(self, followerId: int, followeeId: int) -> None:
+        if followeeId != followerId:
+            self.friends[followerId].add(followeeId)
+
+    def unfollow(self, followerId: int, followeeId: int) -> None:
+        if followeeId in self.friends[followerId]:
+            self.friends[followerId].remove(followeeId)
+
+
+# Your Twitter object will be instantiated and called as such:
+# obj = Twitter()
+# obj.postTweet(userId,tweetId)
+# param_2 = obj.getNewsFeed(userId)
+# obj.follow(followerId,followeeId)
+# obj.unfollow(followerId,followeeId)
+```
+
+说明：
+
+- `self.tweets` 是用于存放用户与其发布的 tweet 的，默认发布的 tweet 是 `None`，但如果直接声明成 `self.tweets = defaultdict(None)` 其实相当于默认值为 None，即没有默认值，这样 defaultdict 还是和 dict 相同，会报 KeyError 的错。所以要声明成 `self.tweets = defaultdict(lambda: None)`，`lambda: None` 意味着会返回 None
+
+  ```python
+  >> a = collections.defaultdict(lambda: None)
+  >> print(a['b'])
+  None
+  
+  >> a = collections.defaultdict(None)
+  >> print(a['b'])
+  Traceback (most recent call last):
+    File "C:\Users\Administrator\Anaconda3\envs\py36\lib\site-packages\IPython\core\interactiveshell.py", line 3343, in run_code
+      exec(code_obj, self.user_global_ns, self.user_ns)
+    File "<ipython-input-19-657ea3224092>", line 1, in <module>
+      print(a['b'])
+  KeyError: 'b'
+  ```
+
+  
+
+- heapq 默认是最小堆，我们将用户的 Tweet 放入这个最小堆中为了获取最新的 Tweet 即 `timestamp` 最大的那些 Tweet，而最小堆会 pop 它认为「最小」的元素，通过重载 `__lt__` 我们定义了 Tweet 实例之间「更小」的概念，即 `timestamp` 更大，也就是「更新」。
 
 # 附录
 
