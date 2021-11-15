@@ -2028,6 +2028,62 @@ class Twitter:
 
 - heapq 默认是最小堆，我们将用户的 Tweet 放入这个最小堆中为了获取最新的 Tweet 即 `timestamp` 最大的那些 Tweet，而最小堆会 pop 它认为「最小」的元素，通过重载 `__lt__` 我们定义了 Tweet 实例之间「更小」的概念，即 `timestamp` 更大，也就是「更新」。
 
+## 设计地铁系统
+
+- 题目
+
+  ```
+  请你实现一个类 UndergroundSystem ，它支持以下 3 种方法：
+  
+  1. checkIn(int id, string stationName, int t)
+  
+  编号为 id 的乘客在 t 时刻进入地铁站 stationName 。
+  一个乘客在同一时间只能在一个地铁站进入或者离开。
+  2. checkOut(int id, string stationName, int t)
+  
+  编号为 id 的乘客在 t 时刻离开地铁站 stationName 。
+  3. getAverageTime(string startStation, string endStation) 
+  
+  返回从地铁站 startStation 到地铁站 endStation 的平均花费时间。
+  平均时间计算的行程包括当前为止所有从 startStation 直接到达 endStation 的行程。
+  调用 getAverageTime 时，询问的路线至少包含一趟行程。
+  你可以假设所有对 checkIn 和 checkOut 的调用都是符合逻辑的。也就是说，如果一个顾客在 t1 时刻到达某个地铁站，那么他离开的时间 t2 一定满足 t2 > t1 。所有的事件都按时间顺序给出。
+  ```
+
+- 思路
+
+  表1：根据 id 来保存上车 车站名字 和 时间
+  表2：在下车车站计算累积线路乘车时间，和线路乘车次数
+  取得平均时间时，只需要查询两个车站，得到总时间，和总次数
+
+- 代码
+
+  ```python
+  class UndergroundSystem:
+  
+      def __init__(self):
+          self.startInfo = dict()
+          self.routines = dict()
+  
+      def checkIn(self, id: int, stationName: str, t: int) -> None:
+          self.startInfo[id] = (stationName, t)
+  
+      def checkOut(self, id: int, stationName: str, t: int) -> None:
+          start_sta, start_time = self.startInfo[id]
+          if (start_sta, stationName) not in self.routines:
+              t_consum = t - start_time
+              self.routines[(start_sta, stationName)] = [t_consum, 1]
+          else:
+              self.routines[(start_sta, stationName)][0] += (t - start_time)
+              self.routines[(start_sta, stationName)][1] += 1
+  
+      def getAverageTime(self, startStation: str, endStation: str) -> float:
+      	route = (startStation, endStation)
+          return self.routines[route][0] / self.routines[route][1]
+  ```
+
+  
+
 # 附录
 
 ## 常识性问题
