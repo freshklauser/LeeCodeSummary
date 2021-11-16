@@ -2082,7 +2082,47 @@ class Twitter:
           return self.routines[route][0] / self.routines[route][1]
   ```
 
-  
+#### [设计文件分享系统](https://leetcode-cn.com/problems/design-a-file-sharing-system/)
+
+```python
+class FileSharing:
+
+    def __init__(self, m: int):
+        self.users = collections.defaultdict(list)
+        self.chunks = collections.defaultdict(set)
+        self.id = 1
+        self.pools = []
+
+    def join(self, ownedChunks: List[int]) -> int:
+        if self.pools:
+            id = heapq.heappop(self.pools)
+        else:
+            id = self.id
+            self.id += 1
+        self.users[id] = ownedChunks
+        for chunk in ownedChunks:
+            self.chunks[chunk].add(id)
+        return id
+
+    def leave(self, userID: int) -> None:
+        for _chunk in self.users[userID]:
+            self.chunks[_chunk].remove(userID)
+        self.users.pop(userID)
+        heapq.heappush(self.pools, userID)
+
+    def request(self, userID: int, chunkID: int) -> List[int]:
+        ans = list(self.chunks[chunkID])
+        if not ans:
+            return ans
+        ans.sort()
+        if userID not in self.chunks[chunkID]:
+            # 如果用户收到 ID 的非空列表，就表示成功接收到请求的文件块, 对应更新users和chunks
+            self.chunks[chunkID].add(userID)
+            self.users[userID].append(chunkID)
+        return ans
+```
+
+
 
 # 附录
 
