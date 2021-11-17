@@ -30,6 +30,7 @@ class newdd(LRUCache):
         super(newdd, self).__init__()
         self.v = v
 
+import heapq
 
 
 from collections import defaultdict
