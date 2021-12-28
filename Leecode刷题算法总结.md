@@ -329,17 +329,81 @@ class Solution:
 
 ## 回溯模板
 
+- 模板
+
+  ```c++
+  void backtracking(参数) {
+      if (终止条件) {
+          存放结果;
+          return;
+      }
+  
+      for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) {
+          处理节点;
+          backtracking(路径，选择列表); // 递归
+          回溯，撤销处理结果
+      }
+  }
+  ```
+
+  
+
 ![image.png](https://pic.leetcode-cn.com/1600377894-BuZLhZ-image.png)
 
 
 
 ## 使用场景
 
-- 返回所有可能结果
+- 组合问题：N个数里面按一定规则找出k个数的集合
+- 切割问题：一个字符串按一定规则有几种切割方式
+- 子集问题：一个N个数的集合里有多少符合条件的子集
+- 排列问题：N个数按一定规则全排列，有几种排列方式
+- 棋盘问题：N皇后，解数独等等
 
-
+![回溯算法大纲](https://img-blog.csdnimg.cn/20210219192050666.png)
 
 ## 实际应用
+
+### 电话号码的字母组合
+
+#### 解题思路（回溯标准模板三步走）
+
+```python
+from typing import List
+
+
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        if len(digits) == 0:
+            return []
+
+        mapper = {
+            '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', '6': 'mno',
+            '7': 'pqrs', '8': 'tuv', '9': 'wxyz'
+        }
+
+        # 回溯标准模板三步走
+        result = []
+        path = ''
+
+        def backtracking(rem_digts, path, result):
+            # 搜索到底时需要进行的操作, 每一层的终止条件
+            if len(path) == len(digits):
+                result.append(path)
+                return
+            for char in mapper[rem_digts[0]]:
+                # 做选择
+                path += char
+                backtracking(rem_digts[1:], path, result)
+                # 撤销选择
+                path = path[:-1]
+        backtracking(digits, path, result)
+
+        return result
+
+```
+
+
 
 ### 全排列
 
@@ -1552,7 +1616,11 @@ class Solution:
 
 # 字符串
 
-## 双指针
+## 双指针 （排序 必须做+ 双指针）
+
+双指针方法一定要先排序
+
+
 
 # 动态规划
 
@@ -1585,6 +1653,10 @@ class Solution:
             res[num] = res.get(num - difference, 0) + 1
         return max(res.values())
 ```
+
+
+
+
 
 # 字典树/前缀树Trie
 
