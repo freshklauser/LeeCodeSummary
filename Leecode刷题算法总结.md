@@ -2,6 +2,8 @@
 
 [TOC]
 
+carl链接: https://gitee.com/programmercarl/leetcode-master
+
 # 二分查找
 
 ## 模板汇总

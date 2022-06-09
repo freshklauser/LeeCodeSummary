@@ -49,4 +49,32 @@
 # leetcode submit region begin(Prohibit modification and deletion)
 class Solution:
     def strStr(self, haystack: str, needle: str) -> int:
+        """
+        简单方法：直接以 needle 长度为滑窗，对 haystack 遍历滑窗与needle比较
+        :param haystack:
+        :param needle:
+        :return:
+        """
+        kmp = True
+        if not kmp:
+            if needle == '':
+                return 0
+            h = len(haystack)
+            n = len(needle)
+            if h < n:
+                return -1
+            for i in range(h):
+                sub = haystack[i:i + n]
+                if sub == needle:
+                    return i
+            return -1
+        else:
+            # 使用 kmp 算法
+            pass
+
+
+
+
+
+
 # leetcode submit region end(Prohibit modification and deletion)
